@@ -1,0 +1,103 @@
+---
+title: "Gapminder Dplyr"
+author: "Nina Bingham"
+date: "April 16, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load dplyr
+
+```{r}
+
+##install.packages("dplyr") 
+# need internet access - we only have to do this once, so it will stay commented after being run the 1st time - run at 1:10 pm 4/16/16
+
+library(dplyr) 
+# using library doesnt need internet access, have to do this everytime you start R and need dplyr
+
+```
+
+## Load gapminder
+
+You can also embed plots, for example:
+
+```{r}
+
+install.packages('gapminder')
+#there is a package with all the gapminder data in it!
+
+library(gapminder)
+
+str(gapminder) 
+#quick exploration of data to see what is there!
+
+
+```
+
+## Exploration with gapminder
+
+```{r}
+
+filter(gapminder, lifeExp < 29) # simple subsetting of rows
+gapminder[gapminder$lifExp < 29, ] #compare result from without dplyr
+
+filter(gapminder, country == "Rwanda") # simple subsetting of rows
+subset(gapminder, country == "Rwanda") # compare result from without dplyr
+
+a <- filter(gapminder, country %in% c("Rwanda", "Afghanistan"))
+
+# the pipe operator %>% ... it takes whatever is on the left and passes it in as the 1st argument of the function on the right. 
+
+# from magrittr package
+
+gapminder %>% head 
+head(gapminder) # compare without dplyr
+
+gapminder %>% head(3) # only want 1st 3 rows
+head(gapminder, 3) # compare without dplyr
+
+# subsetting variables with select
+
+select(gapminder, year, lifeExp) # great, but.... we can do it with pipe too...
+
+gapminder %>% select(year, lifeExp) # subsetting variables with pipe operator
+
+# a short example of how the pipe is helpful...
+gapminder %>% 
+  select(year, lifeExp) %>%
+  head(4)
+
+# another example of how the pipe is baller...Here we are trying to get the mean gdp of Cambodia...
+gapminder %>%
+  filter(country == "Cambodia") %>%
+  select(-continent, -lifeExp) # this says select everything except continent and lifeExp 
+
+# compare the above code to base R ish
+  gapminder[gapminder$country == "Cambodia", c("country", "year", "pop", "gdpPercap")]
+
+# continue with mutate to create gdp per year and then summarize to calc the mean gdp of Cambodia
+  
+gapminder %>%
+  filter(country == "Cambodia") %>%
+  select(-continent, -lifeExp) %>%
+  mutate(gdp = pop * gdpPercap) %>%
+  summarize(mean_gdp = mean(gdp))
+  
+# now we will calculate the mean gdp of all the countries in Asia using the group_by function...group_by is a little bit like a forloop where it says for every specified group, do the following stuff
+
+gapminder %>%
+  filter(continent == "Asia") %>%
+  select(-continent, -lifeExp) %>%
+  mutate(gdp = pop * gdpPercap) %>%
+  group_by(country) %>%
+  summarize(mean_gdp = mean(gdp)) %>%
+  ungroup() # always do this if you group_by
+
+
+```
+
+## The end :) 

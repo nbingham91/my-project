@@ -1,0 +1,84 @@
+---
+title: "viz"
+author: "Nina Bingham"
+date: "April 16, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Now we are going to work on visualization
+
+``` {r load, results='hide', message=FALSE, warning=FALSE}
+
+## install ggplot2 and tmap ...only need to do once, did on april 16th, 2016!
+# install.packages("ggplot2")
+# install.packages("tmap")
+
+library("dplyr")
+library("gapminder") #here we loaded the dplyr library first and because of that when we loaded gapminder is presented a pretty nice looking dataframe.
+library("ggplot2")
+library("tmap") 
+```
+
+## Scatter Plots n stuff
+
+``` {r}
+
+# setup dataframe
+g = gapminder %>%
+  filter(year==2007) %>%   # most recent year 
+  mutate(pop_m = pop/1e6)  # population, millions
+
+# plot scatterplot of most recent year 
+s = ggplot(g, aes(x=gdpPercap, y=lifeExp)) +
+  geom_point()
+s # when it actuall puts it out
+
+# aes is saying.. what do you want to assign for your x and y axis here?
+# geom_point is adding the points in, look in cheatsheets for type of data
+
+# you can add on different data styles to stuff...
+s= s + 
+  aes(size=pop_m) + aes(color=continent)
+
+# add title, update axes labels
+s = s + 
+  ggtitle('Health & Wealth of Nations for 2007') +
+  xlab('GDP per capita ($/year)') +
+  ylab('Life expectancy (years)')
+
+# label legend
+s = s + 
+  scale_colour_discrete(name='Continent') +
+  scale_size_continuous(name='Population (M)')
+
+s
+
+ggsave('hans.png')
+```
+
+## now let's make box plots
+
+```{r}
+
+# boxplot by continent
+b = ggplot(g, aes(x=continent, y=lifeExp)) +
+  geom_boxplot() + aes(fill=continent) + 
+  theme(legend.position='none') +
+  ggtitle('Life Expectancy by Continent for 2007') +
+  xlab('Continent') +
+  ylab('Life expectancy (years)')
+b
+
+#going to plotly to make it INTERACTIVE
+
+#install.packages('plotly') this was done april 16th 2016
+library(plotly) 
+
+# scatterplot (Note: key=country shows up on rollover)
+s = ggplot(g, aes(x=gdpPercap, y=lifeExp, key=country)) +
+  geom_point()
+ggplotly(s)
